@@ -1,0 +1,120 @@
+/* ============================================================
+   MORSIS — fonts.css
+   ITC Avant Garde Std — local only (Assets/Fonts)
+   XLt=200 · Bk=300 · Md=500 · Demi=600 · Bold=700
+   Cn = condensed family; Obl = italic
+   ============================================================ */
+
+/* ---------- regular width ---------- */
+
+@font-face {
+  font-family: "Avant Garde";
+  src: url("../Assets/Fonts/ITCAvantGardeStd-XLt.woff2") format("woff2");
+  font-weight: 200; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Avant Garde";
+  src: url("../Assets/Fonts/ITCAvantGardeStd-XLtObl.woff2") format("woff2");
+  font-weight: 200; font-style: italic; font-display: swap;
+}
+@font-face {
+  font-family: "Avant Garde";
+  src: url("../Assets/Fonts/ITCAvantGardeStd-Bk.woff2") format("woff2");
+  font-weight: 300; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Avant Garde";
+  src: url("../Assets/Fonts/ITCAvantGardeStd-BkObl.woff2") format("woff2");
+  font-weight: 300; font-style: italic; font-display: swap;
+}
+@font-face {
+  font-family: "Avant Garde";
+  src: url("../Assets/Fonts/ITCAvantGardeStd-Md.woff2") format("woff2");
+  font-weight: 500; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Avant Garde";
+  src: url("../Assets/Fonts/ITCAvantGardeStd-MdObl.woff2") format("woff2");
+  font-weight: 500; font-style: italic; font-display: swap;
+}
+@font-face {
+  font-family: "Avant Garde";
+  src: url("../Assets/Fonts/ITCAvantGardeStd-Demi.woff2") format("woff2");
+  font-weight: 600; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Avant Garde";
+  src: url("../Assets/Fonts/ITCAvantGardeStd-DemiObl.woff2") format("woff2");
+  font-weight: 600; font-style: italic; font-display: swap;
+}
+@font-face {
+  font-family: "Avant Garde";
+  src: url("../Assets/Fonts/ITCAvantGardeStd-Bold.woff2") format("woff2");
+  font-weight: 700; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Avant Garde";
+  src: url("../Assets/Fonts/ITCAvantGardeStd-BoldObl.woff2") format("woff2");
+  font-weight: 700; font-style: italic; font-display: swap;
+}
+
+/* ---------- condensed width ---------- */
+
+@font-face {
+  font-family: "Avant Garde Cond";
+  src: url("../Assets/Fonts/ITCAvantGardeStd-XLtCn.woff2") format("woff2");
+  font-weight: 200; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Avant Garde Cond";
+  src: url("../Assets/Fonts/ITCAvantGardeStd-XLtCnObl.woff2") format("woff2");
+  font-weight: 200; font-style: italic; font-display: swap;
+}
+@font-face {
+  font-family: "Avant Garde Cond";
+  src: url("../Assets/Fonts/ITCAvantGardeStd-BkCn.woff2") format("woff2");
+  font-weight: 300; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Avant Garde Cond";
+  src: url("../Assets/Fonts/ITCAvantGardeStd-BkCnObl.woff2") format("woff2");
+  font-weight: 300; font-style: italic; font-display: swap;
+}
+@font-face {
+  font-family: "Avant Garde Cond";
+  src: url("../Assets/Fonts/ITCAvantGardeStd-MdCn.woff2") format("woff2");
+  font-weight: 500; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Avant Garde Cond";
+  src: url("../Assets/Fonts/ITCAvantGardeStd-MdCnObl.woff2") format("woff2");
+  font-weight: 500; font-style: italic; font-display: swap;
+}
+@font-face {
+  font-family: "Avant Garde Cond";
+  src: url("../Assets/Fonts/ITCAvantGardeStd-DemiCn.woff2") format("woff2");
+  font-weight: 600; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Avant Garde Cond";
+  src: url("../Assets/Fonts/ITCAvantGardeStd-DemiCnObl.woff2") format("woff2");
+  font-weight: 600; font-style: italic; font-display: swap;
+}
+@font-face {
+  font-family: "Avant Garde Cond";
+  src: url("../Assets/Fonts/ITCAvantGardeStd-BoldCn.woff2") format("woff2");
+  font-weight: 700; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Avant Garde Cond";
+  src: url("../Assets/Fonts/ITCAvantGardeStd-BoldCnObl.woff2") format("woff2");
+  font-weight: 700; font-style: italic; font-display: swap;
+}
+
+/* ---------- Nothing 5×7 — dot-matrix display face, used for the ring glyph ---------- */
+
+@font-face {
+  font-family: "Nothing";
+  src: url("../Assets/Fonts/nothing-font-5x7.otf") format("opentype");
+  font-weight: 400; font-style: normal; font-display: swap;
+}

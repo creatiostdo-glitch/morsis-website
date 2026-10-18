@@ -1,0 +1,11 @@
+# Claude Code tooling and skills — not part of the website (~12 MB)
+.claude/
+
+# local restore snapshot from development
+_restore/
+
+# OS / editor clutter
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/

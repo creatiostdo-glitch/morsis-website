@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b0c0e" />
+  <link rel="icon" type="image/svg+xml" href="Assets/Logos/Asset%2013.svg" />
+  <title>MORSIS — Project: Birdsong</title>
+  <meta name="description" content="Project: Birdsong. Morsis is a software research lab building the first interspecies communication layer. Bio-acoustic translation, rigorous science, first contact." />
+
+  <!-- the gate (pre-page) is up from the first paint, so the site never flashes underneath it -->
+  <script>document.documentElement.classList.add('js', 'is-gated');</script>
+
+  <link rel="stylesheet" href="styles/fonts.css" />
+  <link rel="stylesheet" href="styles/main.css" />
+  <link rel="stylesheet" href="styles/sections.css" />
+  <!-- dot grid base layer — delete this one line to remove it (see styles/dotgrid.css) -->
+  <link rel="stylesheet" href="styles/dotgrid.css" />
+</head>
+<body>
+
+  <!-- ============ GATE · the pre-page: logo, the emblem in liquid chrome, one way in ============ -->
+  <div class="gate" id="gate" role="dialog" aria-modal="true" aria-label="Morsis — Project: Birdsong">
+    <span class="gate__logo" role="img" aria-label="Morsis">
+      <span class="logo logo--wordmark wordmark__letters"></span><span class="logo logo--emblem wordmark__o"></span>
+    </span>
+    <div class="gate__stage" aria-hidden="true">
+      <span class="gate__shadow"></span>
+      <canvas class="gate__form" id="gateForm"></canvas>
+      <span class="gate__flat logo logo--emblem"></span>
+    </div>
+    <button class="gate__enter" id="gateEnter" type="button">
+      <span class="gate__enter-label">Click to enter the Birdsong Project</span>
+      <span class="gate__enter-arrow" aria-hidden="true">→</span>
+    </button>
+  </div>
+
+  <!-- film grain, page-wide -->
+  <canvas id="grain" aria-hidden="true"></canvas>
+
+  <!-- fixed HUD — the instrument frame; labels swap per scene -->
+  <div class="hud" aria-hidden="false">
+    <header class="hud__top">
+      <div class="meta-col" id="hudLabel">
+        <span data-line>Morsis Research Division</span>
+        <span data-line>Bio-acoustic translation</span>
+      </div>
+
+      <a class="wordmark" href="#s-portal" aria-label="Morsis — back to top">
+        <!-- Assets/Logos/Asset 10.svg (bone) with Asset 13.svg laid over the O (vermilion) — see .logo in main.css -->
+        <span class="wordmark__art" aria-hidden="true"><span class="logo logo--wordmark wordmark__letters"></span><span class="logo logo--emblem wordmark__o"></span></span>
+      </a>
+
+      <div class="hud__nav">
+        <span class="hud__tag">Labs // Aves-Freq-2026</span>
+        <a class="cta" href="#s-manifesto">Institutional Overview</a>
+      </div>
+    </header>
+    <footer class="hud__bottom">
+      <canvas id="signal" aria-hidden="true"></canvas>
+      <div class="hud__row">
+        <span id="hudChannel">CH.01 live signal</span>
+        <a class="foot-scroll" href="#s-fig1">Scroll to read <span class="foot-arrow">↓</span></a>
+      </div>
+    </footer>
+  </div>
+
+
+  <main class="flow">
+
+    <h1 class="visually-hidden">Morsis — the first interspecies communication layer</h1>
+
+    <!-- ============ 01 · HERO · CHAMBER 004 (live encoding demo) ============ -->
+    <section class="scene scene--portal" id="s-portal" data-scene="portal" data-hud="hero" aria-label="Chamber 004: a live demonstration of speech encoded as avian-band tones">
+      <div class="scene__stage" id="portalStage">
+        <canvas id="fluid" aria-hidden="true"></canvas>
+        <p class="portal__fallback">Chamber 004 is running without WebGL · enable hardware acceleration, or restart the browser</p>
+
+        <!-- instrument frame: crosshair hairlines, orbit rings -->
+        <div class="frame frame--hero" aria-hidden="true">
+          <span class="frame__h"></span><span class="frame__v"></span>
+          <span class="orbit orbit--1"><i></i></span>
+          <span class="orbit orbit--2"><i></i></span>
+          <span class="orbit orbit--3"><i></i></span>
+        </div>
+
+        <div class="hero-copy">
+          <div class="hero-intro" id="heroIntro">
+            <h2 class="hero-headline"><span class="hero-kicker" data-decode-on-enter>Project: Birdsong</span>the first language between species.</h2>
+
+            <!-- live readout inside the (clean) gate ring -->
+            <div class="tx-readout" id="txReadout" aria-hidden="true">
+              <span class="tx-glyph" id="txGlyph"></span>
+              <span class="tx-freq" id="txFreq"></span>
+              <span class="tx-step" id="txStep"></span>
+            </div>
+
+            <!-- what the chamber is transmitting right now -->
+            <div class="tx-ticker" id="txTicker">
+              <p class="tx-phrase" id="txPhrase" aria-live="polite"></p>
+              <p class="tx-meta" id="txMeta">Chamber 004 · live encoding · 8–16 kHz</p>
+              <a class="tx-cta" href="#s-translator">Compose your own <span aria-hidden="true">↓</span></a>
+              <button class="tx-cta tx-sound" type="button" aria-pressed="false" data-sound-toggle>Sound · off</button>
+            </div>
+          </div>
+
+          <blockquote class="manifesto" id="manifesto">
+            <p>For millennia, humanity has sought luxury in the material — gold, space,
+            exclusivity. But the ultimate luxury, the one we never thought would exist,
+            is the ability to truly step outside of ourselves. To look into the eyes of
+            another species, to communicate, and to feel felt in return. We are not just
+            building software; we are dismantling the boundary between ‘human’ and
+            ‘nature.’ <em>This is the age of interspecies empathy.</em></p>
+          </blockquote>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FIG. 01 · TRANSITION · swallow → binary ============ -->
+    <section class="scene scene--transit stack" id="s-fig1" data-scene="transit" data-source="dove" data-sweep="rise" data-window="0.1,0.86"
+             data-hud="fig1" aria-label="Figure 01: a dove in flight, lit by your cursor, then resolving into binary data">
+      <div class="scene__stage">
+        <canvas class="transit__canvas" aria-hidden="true"></canvas>
+        <div class="frame" aria-hidden="true">
+          <span class="frame__h"></span><span class="frame__v"></span>
+          <i class="frame__c frame__c--tl"></i><i class="frame__c frame__c--tr"></i>
+          <i class="frame__c frame__c--bl"></i><i class="frame__c frame__c--br"></i>
+        </div>
+        <div class="transit__caption">
+          <span class="fig-no">Fig. 01</span>
+          <span>Columba livia — in flight</span>
+          <span class="fig-meta">Move your cursor to light the specimen</span>
+        </div>
+        <p class="transit__line">Every song is data<br />before it is music.</p>
+      </div>
+    </section>
+
+    <!-- ============ 02 · THE PROBLEM · EXISTENTIAL GAP ============ -->
+    <section class="scene scene--gap stack" id="s-gap" data-scene="gap" data-hud="gap" aria-label="The existential gap">
+      <div class="scene__stage">
+        <!-- background specimen plates (25%, behind the beats) -->
+        <figure class="bio bio--gap-a" data-bio="cells" data-seed="5" aria-hidden="true"><canvas></canvas></figure>
+        <figure class="bio bio--gap-b" data-bio="interference" aria-hidden="true"><canvas></canvas></figure>
+
+
+        <!-- beat 1 · sensory isolation -->
+        <div class="gap-beat gap-beat--umwelt" data-beat="0">
+          <div class="gap-copy">
+            <h2 class="gap-head">every species lives inside its own sensory world.</h2>
+            <p class="gap-body">Biologists call it the <em>umwelt</em>. Ours and a bird’s barely
+              overlap, and almost everything we say falls outside the part we share.</p>
+          </div>
+          <figure class="umwelt" aria-label="Diagram: the human and avian sensory worlds overlap only slightly">
+            <svg viewBox="0 0 400 260" aria-hidden="true">
+              <circle class="umwelt__ring umwelt__ring--human" cx="112" cy="130" r="108" pathLength="1" />
+              <circle class="umwelt__ring umwelt__ring--avian" cx="288" cy="130" r="108" pathLength="1" />
+              <clipPath id="umweltClip"><circle cx="112" cy="130" r="108" /></clipPath>
+              <circle class="umwelt__overlap" cx="288" cy="130" r="108" clip-path="url(#umweltClip)" />
+            </svg>
+            <figcaption>
+              <span class="umwelt__label umwelt__label--human">Human umwelt</span>
+              <span class="umwelt__label umwelt__label--shared">Shared signal</span>
+              <span class="umwelt__label umwelt__label--avian">Avian umwelt</span>
+            </figcaption>
+          </figure>
+        </div>
+
+        <!-- beat 2 · why gimmicks fail -->
+        <div class="gap-beat gap-beat--gimmicks" data-beat="1">
+          <p class="gap-kicker">What exists today</p>
+          <ul class="strike-list">
+            <li><span class="strike">apps that chirp back.</span></li>
+            <li><span class="strike">collars that claim to translate.</span></li>
+            <li><span class="strike">recorded calls on a loop.</span></li>
+          </ul>
+          <p class="gap-body gap-body--center">Novelty treats a living signal as a sound effect.
+            The bird hears noise, and the person hears a joke.</p>
+        </div>
+
+        <!-- beat 3 · why it demands rigor -->
+        <div class="gap-beat gap-beat--rigor" data-beat="2">
+          <h2 class="gap-head gap-head--center">understanding is a<br />modeling problem.</h2>
+          <p class="gap-body gap-body--center">A birdsong is not a word. It is pitch, timing and
+            amplitude shaped at millisecond scale, read by a listener whose hearing is not ours.
+            Reaching it takes signal physics, perceptual models and years of field data,
+            not a soundboard.</p>
+          <ul class="gap-tags">
+            <li><span class="gap-tags__n">01</span>Millisecond timing</li>
+            <li><span class="gap-tags__n">02</span>Species-specific hearing</li>
+            <li><span class="gap-tags__n">03</span>Context, not vocabulary</li>
+          </ul>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============ FIG. 02 · TRANSITION · bioacoustic analysis → binary ============ -->
+    <section class="scene scene--transit stack" id="s-fig2" data-scene="transit" data-source="spectrogram" data-sweep="scan" data-window="0.56,1.0"
+             data-hud="fig2" aria-label="Figure 02: a synthetic birdsong analysed as waveform, spectrogram and power spectrum, then read into binary data">
+      <div class="scene__stage">
+        <canvas class="transit__canvas" aria-hidden="true"></canvas>
+        <p class="visually-hidden" aria-live="polite" data-fig-live></p>
+
+        <!-- listen to the specimen once, read what it is, add your own -->
+        <div class="fig2-bar" data-fig2-bar>
+          <button class="fig2-play" type="button" aria-pressed="false" aria-label="Play the song" data-fig2-play>
+            <span class="fig2-play__icon" aria-hidden="true"></span>
+            <svg class="fig2-play__ring" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18.5" pathLength="1" /></svg>
+          </button>
+          <div class="fig2-spec">
+            <p class="fig2-spec__name">Song sparrow <em>Melospiza melodia</em></p>
+            <p class="fig2-spec__meta">Specimen 0412 · synthetic replica · 2.4 s · 8 syllables · 3.4–9.2 kHz · <span data-fig2-time>00.0 / 02.4 s</span></p>
+          </div>
+          <div class="fig2-upload">
+            <p class="fig2-upload__note"><span class="fig2-upload__dot" aria-hidden="true"></span>Help train the database</p>
+            <label class="fig2-upload__btn">
+              <input type="file" accept="audio/*" data-fig2-upload />
+              <span data-fig2-upload-label>Upload your sample</span>
+              <i class="fig2-upload__fill" aria-hidden="true"></i>
+            </label>
+          </div>
+        </div>
+
+        <p class="transit__line">We read birdsong the way<br />physicists read light.</p>
+      </div>
+    </section>
+
+    <!-- ============ ATLAS · line-art globe, species coverage by continent ============ -->
+    <section class="scene scene--atlas stack" id="s-atlas" data-scene="atlas" data-hud="atlas"
+             aria-label="Global atlas: bird species, and the share Morsis has mapped, by continent">
+      <div class="scene__stage">
+        <canvas class="atlas__globe" id="atlasGlobe" tabindex="0" role="img"
+                aria-label="Line-art globe. Drag or use the arrow keys to rotate; click a continent, or press Enter, to select it; Escape clears."></canvas>
+
+        <div class="atlas__ui">
+          <div class="atlas__col">
+            <header class="atlas__head">
+              <p class="atlas__kicker"><span>Global atlas</span><span id="atlasScope">World</span></p>
+              <h2 class="atlas__title"><span><span>every voice</span></span><span><span>on the planet.</span></span></h2>
+            </header>
+
+            <dl class="atlas__stats">
+              <div class="atlas__stat">
+                <dt>Bird species</dt>
+                <dd><span id="atlasSpecies">0</span></dd>
+              </div>
+              <div class="atlas__stat">
+                <dt>Hypothetical species mapped</dt>
+                <dd><span id="atlasMapped">0</span><small id="atlasPct">0%</small></dd>
+                <i class="atlas__bar" aria-hidden="true"><b id="atlasBar"></b></i>
+              </div>
+            </dl>
+          </div>
+
+          <figure class="atlas__chart" id="atlasChartWrap">
+            <figcaption>
+              <span>Accuracy over time</span>
+              <span class="atlas__acc"><b id="atlasAcc">—</b> · 2026</span>
+            </figcaption>
+            <svg id="atlasChart" viewBox="0 0 340 170" preserveAspectRatio="none" aria-hidden="true"></svg>
+            <div class="atlas__axis" aria-hidden="true"><span>2009</span><span>2014</span><span>2019</span><span>2026</span></div>
+            <p class="atlas__tip" id="atlasTip" aria-hidden="true"></p>
+          </figure>
+
+          <p class="atlas__where" id="atlasWhere" aria-live="polite"></p>
+          <p class="atlas__hint" id="atlasHint">Drag to rotate · Click a continent</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TIMELINE · seventeen years of listening, 2009 → 2026 ============ -->
+    <section class="scene scene--timeline stack" id="s-timeline" data-scene="timeline" data-hud="timeline"
+             aria-labelledby="tlTitle">
+      <div class="scene__stage">
+        <header class="tl__head">
+          <p class="tl__kicker"><span>Research timeline</span><span>2009 — 2026</span></p>
+          <h2 class="tl__title" id="tlTitle">seventeen years<br />of listening.</h2>
+        </header>
+
+        <!-- the year, in the same dot-matrix face as the hero ring -->
+        <p class="tl__year" aria-hidden="true"><span id="tlYear">2009</span></p>
+
+        <ol class="tl__list" id="tlList">
+          <li class="tl__item" data-year="2009" data-month="3">
+            <p class="tl__code">M.01 · Founded</p>
+            <h3 class="tl__name">a lab that listens first.</h3>
+            <p class="tl__body">Morsis begins as a three-person bioacoustics group with one rule: no
+              device ever touches an animal. Software and air only.</p>
+            <p class="tl__metric"><b>3</b> researchers · <b>0</b> species mapped</p>
+          </li>
+          <li class="tl__item" data-year="2011" data-month="6">
+            <p class="tl__code">M.02 · Field archive</p>
+            <h3 class="tl__name">forty thousand hours of song.</h3>
+            <p class="tl__body">A distributed recording network starts building the annotated archive
+              every later model is trained on.</p>
+            <p class="tl__metric"><b>40,000</b> hours annotated</p>
+          </li>
+          <li class="tl__item" data-year="2013" data-month="9">
+            <p class="tl__code">M.03 · First complete map</p>
+            <h3 class="tl__name">one species, 100% mapped.</h3>
+            <p class="tl__body">Every syllable, call and regional dialect of the zebra finch,
+              <em>Taeniopygia guttata</em>, charted end to end: the first full vocal map of any species.</p>
+            <p class="tl__metric"><b>100%</b> repertoire · <b>1</b> species</p>
+          </li>
+          <li class="tl__item" data-year="2016" data-month="4">
+            <p class="tl__code">M.04 · Intent decoded</p>
+            <h3 class="tl__name">alarm is not contact.</h3>
+            <p class="tl__body">The first harmonic-intent model separates alarm, contact and courtship
+              calls across twelve songbird species without being told which is which.</p>
+            <p class="tl__metric"><b>91%</b> intent accuracy · <b>12</b> species</p>
+          </li>
+          <li class="tl__item" data-year="2018" data-month="11">
+            <p class="tl__code">M.05 · Scale</p>
+            <h3 class="tl__name">a thousand voices.</h3>
+            <p class="tl__body">Transfer learning across related species turns months of mapping into
+              days. The atlas passes one thousand species.</p>
+            <p class="tl__metric"><b>1,000</b> species mapped</p>
+          </li>
+          <li class="tl__item" data-year="2020" data-month="5">
+            <p class="tl__code">M.06 · Beta model</p>
+            <h3 class="tl__name">the first beta model.</h3>
+            <p class="tl__body">Model β.1 opens to eleven partner ornithology labs: phrase in, avian-band
+              signal out, with every transmission logged for review.</p>
+            <p class="tl__metric"><b>11</b> partner labs · <b>β.1</b></p>
+          </li>
+          <li class="tl__item" data-year="2022" data-month="8">
+            <p class="tl__code">M.07 · First answer</p>
+            <h3 class="tl__name">a wren answers back.</h3>
+            <p class="tl__body">In Chamber 004, a wild Eurasian wren replies to a synthesized contact call
+              with its own, under the non-invasive protocol. Replicated 214 times.</p>
+            <p class="tl__metric"><b>214</b> verified exchanges</p>
+          </li>
+          <li class="tl__item" data-year="2024" data-month="2">
+            <p class="tl__code">M.08 · Half the sky</p>
+            <h3 class="tl__name">half of all birds, mapped.</h3>
+            <p class="tl__body">The atlas crosses five thousand species, and the protocol draft opens for
+              public peer review.</p>
+            <p class="tl__metric"><b>5,500</b> species · <b>50%</b></p>
+          </li>
+          <li class="tl__item tl__item--naiva" data-year="2026" data-month="10">
+            <p class="tl__code">M.09 · Public release</p>
+            <h3 class="tl__name">naiva.</h3>
+            <p class="tl__body">Naiva, the first publicly accessible Morsis model. Anyone can compose a
+              phrase and hear it shaped for a bird’s hearing.</p>
+            <p class="tl__metric"><b>6,831</b> species · <b>62%</b> mapped</p>
+            <a class="tl__cta" href="#s-translator">Try Naiva <span aria-hidden="true">↓</span></a>
+          </li>
+        </ol>
+
+        <!-- the record: a trace that grows with the work, a ruler of years, a playhead -->
+        <div class="tl__track" aria-hidden="true">
+          <canvas class="tl__trace" id="tlTrace"></canvas>
+          <div class="tl__ruler" id="tlRuler"></div>
+          <span class="tl__head-line" id="tlHead"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 03 · CORE RESEARCH PILLARS · morphing liquid form ============ -->
+    <section class="scene scene--pillars stack" id="s-pillars" data-scene="pillars" data-hud="pillars" aria-label="Core research pillars">
+      <div class="scene__stage">
+        <div class="plate" id="plate">
+          <canvas class="plate__helix" id="helix" aria-hidden="true"></canvas>
+          <div class="plate__dof" aria-hidden="true"></div>
+
+          <!-- giant index numerals, printed behind the form -->
+          <p class="plate__num" aria-hidden="true">
+            <span data-pillar="0">01</span><span data-pillar="1">02</span><span data-pillar="2">03</span>
+          </p>
+
+          <header class="plate__top">
+            <p class="plate__title">Core research pillars // Software architecture</p>
+            <p class="plate__fig">Fig. 03 — liquid form, rendered live · <b id="pillarIdx">01</b> / 03</p>
+          </header>
+
+          <div class="plate__pillars">
+            <article class="plate__pillar" data-pillar="0">
+              <p class="plate__code">[P.01 // 08–16 kHz]</p>
+              <h2 class="plate__head">Frequency<br />synthesis</h2>
+              <p class="plate__desc">Avian Frequency Synthesis translates human speech into high-frequency
+                acoustic waves tailored to avian hearing.</p>
+            </article>
+            <article class="plate__pillar" data-pillar="1">
+              <p class="plate__code">[P.02 // INTENT.MAP]</p>
+              <h2 class="plate__head">Harmonic<br />intent</h2>
+              <p class="plate__desc">Harmonic Intent Mapping encodes emotional intent and context into
+                bio-congruent resonance patterns.</p>
+            </article>
+            <article class="plate__pillar" data-pillar="2">
+              <p class="plate__code">[P.03 // NO.CONTACT]</p>
+              <h2 class="plate__head">Silent<br />contact</h2>
+              <p class="plate__desc">The Non-Invasive Interspecies Protocol: pure software signals across
+                acoustic space. No physical attachments.</p>
+            </article>
+          </div>
+
+          <div class="plate__status">
+            <dl class="status-set" data-pillar="0">
+              <dt>Status:</dt><dd>Synthesis engine v0.9 — in controlled trials.</dd>
+              <dt>Mission:</dt><dd>Carry the shape of human speech into the avian band without losing its rhythm.</dd>
+              <dt>Objective:</dt><dd>Map every glyph to a tone a songbird can resolve.</dd>
+            </dl>
+            <dl class="status-set" data-pillar="1">
+              <dt>Status:</dt><dd>Intent model — training on annotated field recordings.</dd>
+              <dt>Mission:</dt><dd>Encode why something is said, not only what.</dd>
+              <dt>Objective:</dt><dd>Express calm, alarm and invitation as resonance ratios.</dd>
+            </dl>
+            <dl class="status-set" data-pillar="2">
+              <dt>Status:</dt><dd>Protocol draft 0.3 — open for peer review.</dd>
+              <dt>Mission:</dt><dd>Reach animals through air alone: no collars, tags or captivity.</dd>
+              <dt>Objective:</dt><dd>Keep every signal reversible, logged and non-invasive.</dd>
+            </dl>
+          </div>
+
+          <footer class="plate__bottom">
+            <span class="logo logo--lockup logo--ink" role="img" aria-label="Morsis"></span>
+            <ol class="plate__rail" aria-label="Research pillars">
+              <li data-pillar="0"><span class="rail__code">P.01</span><span class="rail__name">Frequency synthesis</span><i class="rail__bar"><b></b></i></li>
+              <li data-pillar="1"><span class="rail__code">P.02</span><span class="rail__name">Harmonic intent</span><i class="rail__bar"><b></b></i></li>
+              <li data-pillar="2"><span class="rail__code">P.03</span><span class="rail__name">Silent contact</span><i class="rail__bar"><b></b></i></li>
+            </ol>
+            <span class="barcode" data-code="MRS-PILLARS-03" aria-hidden="true"></span>
+          </footer>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FIG. 04 · TRANSITION · solid emblem, cursor probe → binary ============ -->
+    <section class="scene scene--transit stack" id="s-fig4" data-scene="transit" data-source="emblemSolid" data-sweep="radial"
+             data-probe="true" data-window="0.3,0.62" data-hud="fig4"
+             aria-label="Figure 04: the Morsis emblem as a solid specimen. Your cursor breaks it into binary; scrolling resolves all of it.">
+      <div class="scene__stage">
+        <canvas class="transit__canvas" aria-hidden="true"></canvas>
+        <div class="frame" aria-hidden="true">
+          <span class="frame__h"></span><span class="frame__v"></span>
+          <i class="frame__c frame__c--tl"></i><i class="frame__c frame__c--tr"></i>
+          <i class="frame__c frame__c--bl"></i><i class="frame__c frame__c--br"></i>
+        </div>
+        <div class="transit__caption">
+          <span class="fig-no">Fig. 04</span>
+          <span>Emblem — specimen</span>
+          <span class="fig-meta">Move your cursor to probe</span>
+        </div>
+        <p class="transit__line">From signal,<br />to understanding.</p>
+
+        <!-- the emblem's binary resolves into a word, and the word into a name:
+             AVIAN → NAIVA (scripts/naiva.js) -->
+        <div class="intro" id="introNaiva">
+          <h2 class="visually-hidden">Introducing Naiva</h2>
+          <p class="intro__kicker" aria-hidden="true">Introducing</p>
+          <p class="intro__word" aria-hidden="true"><span class="intro__l">A</span><span class="intro__l">V</span><span class="intro__l">I</span><span class="intro__l">A</span><span class="intro__l">N</span></p>
+          <p class="intro__sub">The first public model of Project: Birdsong</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 05 · AVES SIGNAL TRANSLATOR · after Fig. 04, before the manifesto ============ -->
+    <section class="panel panel--translator stack" id="s-translator" data-hud="translator" aria-labelledby="trTitle">
+      <!-- the engine locks onto the screen for a stretch of scroll, then moves on (tr-pin + tr-hold) -->
+      <div class="tr-pin" id="trPin">
+      <div class="panel__fog" aria-hidden="true"></div>
+      <div class="translator">
+
+        <header class="translator__intro reveal">
+          <h2 class="display lines" id="trTitle"><span>naiva.</span><span>speak to a bird.</span></h2>
+          <p class="lede">Naiva is the first Morsis model open to everyone. Type a human phrase and
+            Naiva encodes each glyph as a tone inside the avian band you choose, then models how the
+            signal would travel through open air.</p>
+          <p class="wide-label">Naiva v1.0 · Project: Birdsong</p>
+        </header>
+
+        <form class="tr-controls reveal" id="trForm" autocomplete="off">
+          <label class="field-label" for="trInput">Human phrase</label>
+          <div class="tr-input">
+            <input id="trInput" name="phrase" type="text" maxlength="48" spellcheck="false"
+                   placeholder="Enter human phrase to synthesize..." enterkeyhint="go" />
+            <span class="tr-count" id="trCount" aria-hidden="true">00 / 48</span>
+          </div>
+
+          <fieldset class="tr-spectrum">
+            <legend class="field-label">Target avian spectrum</legend>
+            <label class="spec-card">
+              <input type="radio" name="spectrum" value="passeriformes" checked />
+              <span class="spec-card__latin">Passeriformes</span>
+              <span class="spec-card__common">Songbird</span>
+              <span class="spec-card__band">8.0–16.0 kHz</span>
+            </label>
+            <label class="spec-card">
+              <input type="radio" name="spectrum" value="psittaciformes" />
+              <span class="spec-card__latin">Psittaciformes</span>
+              <span class="spec-card__common">Resonance</span>
+              <span class="spec-card__band">2.0–8.0 kHz</span>
+            </label>
+            <label class="spec-card">
+              <input type="radio" name="spectrum" value="raptores" />
+              <span class="spec-card__latin">Raptores</span>
+              <span class="spec-card__common">Infrasound</span>
+              <span class="spec-card__band">0.4–2.0 kHz</span>
+            </label>
+          </fieldset>
+
+          <div class="tr-actions">
+            <button class="btn-primary" type="submit" id="trEncode" disabled>Encode &amp; Modulate Signal</button>
+            <button class="btn-ghost" type="button" aria-pressed="false" data-sound-toggle>Sound · off</button>
+            <button class="btn-ghost btn-rec" type="button" id="trRec" aria-pressed="false">
+              <i class="rec-dot" aria-hidden="true"></i><span class="rec-label">Record</span><span class="rec-time" aria-hidden="true"></span>
+            </button>
+          </div>
+          <!-- the last take: kept in MORSIS.recordings for later features -->
+          <p class="tr-take" id="trTake" hidden aria-live="polite">
+            <span class="tr-take__name"></span>
+            <button class="tr-take__play" type="button" aria-label="Play the recording">Play</button>
+          </p>
+        </form>
+
+        <div class="instrument reveal" id="trInstrument">
+          <i class="frame__c frame__c--tl"></i><i class="frame__c frame__c--tr"></i>
+          <i class="frame__c frame__c--bl"></i><i class="frame__c frame__c--br"></i>
+
+          <div class="instrument__bar">
+            <span>CH.07 · Naiva oscilloscope</span>
+            <span class="status" id="trStatus"><i></i><b>Idle</b></span>
+          </div>
+          <canvas class="instrument__scope" id="trScope" aria-label="Oscilloscope trace of the encoded signal"></canvas>
+
+          <div class="instrument__bar">
+            <span>Spectrogram · waterfall</span>
+            <span id="trRange">0–25.6 kHz</span>
+          </div>
+          <div class="spectro-wrap">
+            <canvas class="instrument__spectro" id="trSpectro" aria-label="Scrolling spectrogram of the encoded signal"></canvas>
+            <p class="spectro-idle" id="trIdle">Listening. Encode a phrase to see its spectrum.</p>
+          </div>
+
+          <ol class="tr-seq" id="trSeq" aria-label="Encoded glyph sequence"><li class="tr-seq__empty">Encoded glyphs appear here, one tone per letter.</li></ol>
+
+          <dl class="metrics">
+            <div class="metric"><dt>Frequency peak</dt><dd><span id="mPeak">—</span><small>kHz</small></dd></div>
+            <div class="metric"><dt>Harmonic resonance index</dt><dd><span id="mHri">—</span><small>HRI</small></dd></div>
+            <div class="metric"><dt>Signal fidelity</dt><dd><span id="mFid">—</span><small>%</small></dd></div>
+            <div class="metric"><dt>Acoustic dispersion rate</dt><dd><span id="mDisp">—</span><small>dB/m</small></dd></div>
+          </dl>
+
+          <div class="instrument__foot">
+            <span class="barcode" id="trBarcode" data-code="SIG-AWAITING" aria-hidden="true"></span>
+            <span id="trSig">SIG — awaiting input</span>
+          </div>
+        </div>
+
+      </div>
+      <span class="tr-lock" id="trLock" aria-hidden="true"><i></i></span>
+      </div>
+      <div class="tr-hold" aria-hidden="true"></div>
+    </section>
+
+    <!-- ============ 06 · LAB MANIFESTO · VALUES · PUBLICATIONS · INQUIRY ============ -->
+    <section class="panel panel--manifesto" id="s-manifesto" data-hud="manifesto" aria-labelledby="mfTitle">
+
+      <div class="mf-hero">
+        <figure class="bio bio--mf-a" data-bio="feather" data-seed="9" aria-hidden="true"><canvas></canvas></figure>
+        <figure class="bio bio--mf-b" data-bio="contour" aria-hidden="true"><canvas></canvas></figure>
+        <div class="frame frame--glow" aria-hidden="true">
+          <span class="frame__h"></span><span class="frame__v"></span>
+          <span class="orbit orbit--1"><i></i></span>
+          <span class="orbit orbit--2"><i></i></span>
+          <span class="orbit orbit--3"><i></i></span>
+          <span class="glow-core"></span>
+        </div>
+        <h2 class="statement lines" id="mfTitle"><span>We build to understand,</span><span>never to command.</span></h2>
+        <p class="lede lede--center reveal">Morsis is a software research lab. We make no collars,
+          no gadgets and no novelty apps: only signals, models, and the ethics to use them well.</p>
+      </div>
+
+      <ol class="values">
+        <li class="value reveal">
+          <span class="value__n">[V.01]</span>
+          <h3 class="value__title lines"><span>empathy over mastery.</span></h3>
+          <p>Technology designed not to domesticate or command, but to establish mutual,
+            respectful understanding between species.</p>
+        </li>
+        <li class="value reveal" style="--d: 0.08s">
+          <span class="value__n">[V.02]</span>
+          <h3 class="value__title lines"><span>rigor and wonder.</span></h3>
+          <p>We treat biological mystery with mathematical precision, and with reverence.
+            Every claim is modeled, measured and open to review.</p>
+        </li>
+        <li class="value reveal" style="--d: 0.16s">
+          <span class="value__n">[V.03]</span>
+          <h3 class="value__title lines"><span>the ultimate luxury.</span></h3>
+          <p>True connection beyond human boundaries: a paradigm shift in how we perceive
+            intelligence, and life.</p>
+        </li>
+      </ol>
+
+      <div class="pubs reveal">
+        <div class="pubs__head">
+          <h3 class="kicker">Publication log</h3>
+          <span class="kicker">05 entries · updated 2026.10</span>
+        </div>
+        <div class="pub-scroll">
+          <table class="pub-table">
+            <thead>
+              <tr><th scope="col">ID</th><th scope="col">Title</th><th scope="col">Type</th><th scope="col">Date</th><th scope="col">Status</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>MRS-TR-001</td><td>A log-spaced glyph-to-tone mapping for avian-band synthesis</td><td>Technical report</td><td>2026.02</td><td><span class="pill">Published</span></td></tr>
+              <tr><td>MRS-TR-002</td><td>Harmonic intent: encoding affect as resonance ratios</td><td>Preprint</td><td>2026.05</td><td><span class="pill pill--live">Under review</span></td></tr>
+              <tr><td>MRS-FN-003</td><td>Field notes from Chamber 004: playback without attachment</td><td>Field note</td><td>2026.07</td><td><span class="pill">Published</span></td></tr>
+              <tr><td>MRS-PR-004</td><td>Non-invasive interspecies protocol, draft 0.3</td><td>Protocol</td><td>2026.09</td><td><span class="pill pill--live">Draft</span></td></tr>
+              <tr><td>MRS-ET-005</td><td>An ethics charter for interspecies signal research</td><td>Charter</td><td>2026.10</td><td><span class="pill pill--live">Open for comment</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="reading">
+          <h3 class="kicker">Foundational reading</h3>
+          <ul>
+            <li>von Uexküll, J. (1934). <em>A Foray into the Worlds of Animals and Humans.</em></li>
+            <li>Marler, P. &amp; Slabbekoorn, H. (Eds.) (2004). <em>Nature’s Music: The Science of Birdsong.</em> Academic Press.</li>
+            <li>Catchpole, C. K. &amp; Slater, P. J. B. (2008). <em>Bird Song: Biological Themes and Variations</em> (2nd ed.). Cambridge University Press.</li>
+            <li>Dooling, R. J., Lohr, B. &amp; Dent, M. L. (2000). Hearing in birds and reptiles. In <em>Comparative Hearing: Birds and Reptiles.</em> Springer.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="inquiry reveal">
+        <figure class="bio bio--inq" data-bio="feather" data-seed="21" aria-hidden="true"><canvas></canvas></figure>
+        <div class="inquiry__copy">
+          <h3 class="display display--md lines"><span>open a</span><span>channel.</span></h3>
+          <p class="lede">For academic partners, fellowship applicants and press. Every inquiry is read
+            by a researcher, not a funnel.</p>
+        </div>
+
+        <form class="inquiry__form" id="inqForm" novalidate autocomplete="on">
+          <i class="frame__c frame__c--tl"></i><i class="frame__c frame__c--tr"></i>
+          <i class="frame__c frame__c--bl"></i><i class="frame__c frame__c--br"></i>
+
+          <div class="field">
+            <label class="field-label" for="inqName">Name</label>
+            <input id="inqName" name="name" type="text" autocomplete="name" required />
+          </div>
+          <div class="field">
+            <label class="field-label" for="inqOrg">Institution</label>
+            <input id="inqOrg" name="institution" type="text" autocomplete="organization" required />
+          </div>
+          <div class="field field--wide">
+            <label class="field-label" for="inqEmail">Email</label>
+            <input id="inqEmail" name="email" type="email" autocomplete="email" required />
+          </div>
+          <fieldset class="field field--wide seg">
+            <legend class="field-label">Inquiry type</legend>
+            <label><input type="radio" name="type" value="research" checked /><span>Research collaboration</span></label>
+            <label><input type="radio" name="type" value="fellowship" /><span>Fellowship</span></label>
+            <label><input type="radio" name="type" value="press" /><span>Press</span></label>
+          </fieldset>
+          <div class="field field--wide">
+            <label class="field-label" for="inqMsg">Message <span class="field-hint" id="inqCount">0 / 600</span></label>
+            <textarea id="inqMsg" name="message" rows="4" maxlength="600" required></textarea>
+          </div>
+          <div class="field field--wide inquiry__actions">
+            <button class="btn-primary" type="submit">Send inquiry</button>
+            <p class="form-note" id="inqNote" role="status"></p>
+          </div>
+        </form>
+      </div>
+
+      <footer class="colophon">
+        <span class="logo logo--wordmark colophon__word" role="img" aria-label="Morsis"></span>
+        <p class="colophon__fine">Project: Birdsong. Morsis is a software research lab building the first interspecies
+          communication layer. Rigorous enough to believe, strange enough to remember.</p>
+        <div class="colophon__row">
+          <span class="logo logo--lockup colophon__mark" role="img" aria-label="Morsis"></span>
+          <span>Research Division · Bio-acoustic translation</span>
+          <span>Labs // Aves-Freq-2026</span>
+          <span class="barcode" data-code="MORSIS-LABS-2026" aria-hidden="true"></span>
+          <span>2026</span>
+        </div>
+      </footer>
+    </section>
+
+  </main>
+
+  <script src="scripts/gate.js" defer></script>
+  <script src="scripts/main.js" defer></script>
+  <script src="scripts/flow.js" defer></script>
+  <script src="scripts/panels.js" defer></script>
+  <script src="scripts/portal.js" defer></script>
+  <script src="scripts/transmit.js" defer></script>
+  <script src="scripts/dissolve.js" defer></script>
+  <script src="scripts/naiva.js" defer></script>
+  <script src="scripts/helix.js" defer></script>
+  <script src="scripts/atlas.js" defer></script>
+  <script src="scripts/timeline.js" defer></script>
+  <script src="scripts/translator.js" defer></script>
+  <script src="scripts/bioplates.js" defer></script>
+</body>
+</html>
