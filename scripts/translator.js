@@ -120,7 +120,7 @@
 
   function setStatus(state) {
     statusEl.dataset.state = state;
-    statusEl.querySelector('b').textContent = { idle: 'Idle', encoding: 'Encoding', locked: 'Locked', recording: 'Recording' }[state];
+    statusEl.querySelector('b').textContent = { idle: 'Idle', encoding: 'Encoding', locked: 'Locked' }[state];
   }
 
   /* ---------------- playback ---------------- */
@@ -219,26 +219,6 @@
     for (let gy = 1; gy < 4; gy++) { const y = (gy / 4) * H; sctx.moveTo(0, y); sctx.lineTo(W, y); }
     sctx.stroke();
 
-    // recording: the scope shows the live microphone instead of the model
-    if (mic) {
-      mic.analyser.getByteTimeDomainData(mic.wave);
-      sctx.save();
-      sctx.shadowColor = 'rgba(255, 72, 0, 0.7)';
-      sctx.shadowBlur = 8 * dpr;
-      sctx.strokeStyle = 'rgba(255, 92, 30, 0.95)';
-      sctx.lineWidth = 1.4 * dpr;
-      sctx.beginPath();
-      const n = mic.wave.length;
-      for (let x = 0; x <= W; x += 2) {
-        const v = (mic.wave[Math.min(n - 1, Math.floor((x / W) * n))] - 128) / 128;
-        const y = mid - v * H * 0.46 * Math.sin(Math.PI * (x / W)) ** 0.35;
-        x ? sctx.lineTo(x, y) : sctx.moveTo(x, y);
-      }
-      sctx.stroke();
-      sctx.restore();
-      return;
-    }
-
     const targetAmp = tone ? 0.3 + tone.amp * 0.55 : 0.05;
     const targetCyc = tone ? 3 + tone.norm * 11 : 4;
     amp += (targetAmp - amp) * Math.min(1, dt * 10);
@@ -281,16 +261,10 @@
     const fm = fMax();
     const bw = fm * 0.011;
     const harm = band().harm;
-    if (mic) mic.analyser.getByteFrequencyData(mic.freq);
-    const nyq = mic ? mic.rate / 2 : 1;
     for (let y = 0; y < H; y++) {
       const f = (1 - y / H) * fm;
       let v = Math.random() * 0.05 + (f < fm * 0.06 ? 0.05 : 0);
-      if (mic) {
-        // the live microphone, on the same frequency axis as the model's tones
-        const bin = Math.min(mic.freq.length - 1, Math.floor((f / nyq) * mic.freq.length));
-        v = Math.max(v, Math.pow(mic.freq[bin] / 255, 1.6));
-      } else if (tone) {
+      if (tone) {
         for (let k = 0; k < harm.length; k++) {
           const df = (f - tone.hz * (k + 1)) / bw;
           v += tone.amp * harm[k] * Math.exp(-df * df);
@@ -320,119 +294,6 @@
     drawScope(dt);
     drawSpectro();
   }
-
-  /* ---------------- recorder ----------------
-     Captures the microphone into a take for later features (nothing consumes
-     it yet). Takes live in MORSIS.recordings; each one also fires a
-     `morsis:recording` event with { blob, url, duration, mime } as detail.
-     While recording, the scope and the waterfall show the live input. */
-
-  let mic = null;            // { analyser, wave, freq, rate } while recording
-  const recBtn = $('trRec');
-  const takeEl = $('trTake');
-  const MAX_TAKE = 30;       // seconds; a take stops itself here
-  const rec = { recorder: null, stream: null, chunks: [], t0: 0, timer: 0 };
-  M.recordings = M.recordings || [];
-
-  const fmtTime = (s) => `${pad2(Math.floor(s / 60))}:${pad2(Math.floor(s % 60))}`;
-  const recLabel = (text) => { recBtn.querySelector('.rec-label').textContent = text; };
-
-  function canRecord() {
-    return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
-  }
-
-  async function startRecording() {
-    let stream;
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
-      });
-    } catch (err) {
-      recLabel(err && err.name === 'NotAllowedError' ? 'Mic blocked' : 'No microphone');
-      setTimeout(() => recLabel('Record'), 2600);
-      return;
-    }
-    const type = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg']
-      .find((t) => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) || '';
-    const recorder = new MediaRecorder(stream, type ? { mimeType: type } : undefined);
-    Object.assign(rec, { recorder, stream, chunks: [], t0: performance.now() });
-    recorder.addEventListener('dataavailable', (e) => { if (e.data && e.data.size) rec.chunks.push(e.data); });
-    recorder.addEventListener('stop', finishTake);
-    recorder.start(250);
-
-    // feed the instrument: a silent analyser tap (never routed to the speakers)
-    const ctx = M.ensureAudio ? M.ensureAudio() : null;
-    if (ctx) {
-      const analyser = ctx.createAnalyser();
-      analyser.fftSize = 2048;
-      analyser.smoothingTimeConstant = 0.55;
-      const src = ctx.createMediaStreamSource(stream);
-      src.connect(analyser);
-      mic = { analyser, src, wave: new Uint8Array(analyser.fftSize), freq: new Uint8Array(analyser.frequencyBinCount), rate: ctx.sampleRate };
-    }
-
-    run++;                    // stop any phrase playback; the instrument is listening now
-    tone = null;
-    if (idleEl) idleEl.classList.add('is-hidden');
-    setStatus('recording');
-    recBtn.classList.add('is-rec');
-    recBtn.setAttribute('aria-pressed', 'true');
-    recLabel('Stop');
-    const tick = () => {
-      const s = (performance.now() - rec.t0) / 1000;
-      recBtn.querySelector('.rec-time').textContent = fmtTime(s);
-      if (s >= MAX_TAKE) stopRecording();
-    };
-    tick();
-    rec.timer = setInterval(tick, 250);
-  }
-
-  function stopRecording() {
-    if (!rec.recorder || rec.recorder.state === 'inactive') return;
-    clearInterval(rec.timer);
-    rec.duration = (performance.now() - rec.t0) / 1000;
-    rec.recorder.stop();
-    rec.stream.getTracks().forEach((tr) => tr.stop());
-    if (mic) { try { mic.src.disconnect(); } catch (_) { /* ok */ } }
-    mic = null;
-    recBtn.classList.remove('is-rec');
-    recBtn.setAttribute('aria-pressed', 'false');
-    recLabel('Record');
-    setStatus('idle');
-  }
-
-  function finishTake() {
-    const mime = rec.recorder.mimeType || 'audio/webm';
-    const blob = new Blob(rec.chunks, { type: mime });
-    const take = { blob, url: URL.createObjectURL(blob), duration: rec.duration, mime, at: new Date().toISOString() };
-    M.recordings.push(take);
-    window.dispatchEvent(new CustomEvent('morsis:recording', { detail: take }));
-    takeEl.querySelector('.tr-take__name').innerHTML =
-      `Take <b>${pad2(M.recordings.length)}</b> · <b>${take.duration.toFixed(1)} s</b> · held for Naiva`;
-    takeEl.hidden = false;
-    takeEl.style.animation = 'none';
-    void takeEl.offsetWidth;            // replay the arrival for each new take
-    takeEl.style.animation = '';
-  }
-
-  let player = null;
-  takeEl.querySelector('.tr-take__play').addEventListener('click', (e) => {
-    const take = M.recordings[M.recordings.length - 1];
-    if (!take) return;
-    if (player && !player.paused) { player.pause(); e.target.textContent = 'Play'; return; }
-    player = new Audio(take.url);
-    player.addEventListener('ended', () => { e.target.textContent = 'Play'; });
-    player.play().then(() => { e.target.textContent = 'Pause'; }).catch(() => {});
-  });
-
-  if (!canRecord()) {
-    recBtn.disabled = true;
-    recLabel('Recording unavailable');
-  }
-  recBtn.addEventListener('click', () => {
-    if (rec.recorder && rec.recorder.state === 'recording') stopRecording();
-    else startRecording();
-  });
 
   /* ---------------- controls ---------------- */
 

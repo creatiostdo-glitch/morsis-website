@@ -23,10 +23,15 @@
   // a reload always starts the story at the top: no restored scroll position,
   // and no jump to a #section left in the URL by an in-page link
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-  if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+  // …except a return from the speak page (?return=engine), which lands on the
+  // Naiva engine, already locked in place, with no gate
+  const returning = document.documentElement.classList.contains('is-returning');
+  if (location.hash || returning) history.replaceState(null, '', location.pathname);
   const toTop = () => window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-  toTop();
-  window.addEventListener('load', toTop, { once: true });   // after late layout, before anything is seen
+  if (!returning) {
+    toTop();
+    window.addEventListener('load', toTop, { once: true });   // after late layout, before anything is seen
+  }
   const M = (window.MORSIS = window.MORSIS || {});
   M.onScene = M.onScene || {};
   M.chamberDim = 1;
@@ -222,6 +227,25 @@
   /* ---------------- main loop ---------------- */
 
   let sY = window.scrollY;
+
+  // back from the speak page: jump (not glide) to the engine's locked position,
+  // then reveal the page. The smoothed scroll is set too, so nothing sweeps past.
+  if (returning) {
+    const land = () => {
+      const panel = document.getElementById('s-translator');
+      const pin = document.getElementById('trPin');
+      if (panel) {
+        measure();
+        const pinTop = pin ? parseFloat(getComputedStyle(pin).top) || 0 : 0;
+        const y = panel.offsetTop + Math.max(0, -pinTop) + 2;
+        window.scrollTo({ top: y, left: 0, behavior: 'instant' });
+        sY = window.scrollY;
+      }
+      document.documentElement.classList.remove('is-returning');
+    };
+    if (document.readyState === 'complete') land();
+    else window.addEventListener('load', land, { once: true });
+  }
   const REDUCED_OK = new Set(['portal', 'gap', 'transit', 'pillars', 'atlas', 'timeline']);
 
   function update() {

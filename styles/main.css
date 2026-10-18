@@ -814,6 +814,9 @@ a { color: inherit; }
    back into one before the room lifts away like a curtain.] */
 .gate { display: none; }
 
+/* back from the speak page: hidden for the instant it takes flow.js to jump to the engine */
+.is-returning body { visibility: hidden; }
+
 .is-gated,
 .is-gated body { overflow: hidden; }
 
@@ -832,6 +835,8 @@ a { color: inherit; }
   transition: clip-path 1s cubic-bezier(0.7, 0, 0.2, 1);
 }
 .gate.is-leaving { clip-path: inset(0 0 100% 0); }
+/* the speak page leaves by fading, then navigates back to the engine */
+.gate.is-leaving-soft { opacity: 0; transition: opacity 0.5s var(--ease-out) 0.25s; }
 
 /* the header's own lockup (Asset 10 + Asset 13 over the O), all in obsidian */
 .gate__logo {
@@ -849,10 +854,54 @@ a { color: inherit; }
 
 .gate__stage {
   position: relative;
-  width: min(64vmin, 620px);
+  width: min(60vmin, 600px);
   aspect-ratio: 1;
   flex: none;
+  margin-top: auto;
+  cursor: pointer;
+  touch-action: none;           /* a long press must not scroll or open a context menu */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  outline: none;
 }
+.gate__stage:focus-visible { outline: 1px dashed rgba(11, 12, 14, 0.4); outline-offset: -8%; border-radius: 50%; }
+
+/* the push-to-speak read-out under the emblem */
+.gate__say {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 18px;
+  margin: 0 0 auto;
+  font-family: var(--font-meta);
+  font-weight: 500;
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(11, 12, 14, 0.6);
+  font-variant-numeric: tabular-nums;
+  opacity: 0;
+  transition: opacity 0.9s var(--ease-out) 1.6s, color 0.3s var(--ease-out);
+}
+.gate.is-ready .gate__say { opacity: 1; }
+.gate.is-settled .gate__say { transition: opacity 0.3s var(--ease-out), color 0.3s var(--ease-out); }
+.gate__say i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--void);
+  opacity: 0.5;
+  transition: background-color 0.3s var(--ease-out), opacity 0.3s var(--ease-out);
+}
+.gate__say[data-state="listening"] { color: var(--void); }
+.gate__say[data-state="listening"] i { background: var(--signal); opacity: 1; animation: rec-breathe 0.9s ease-in-out infinite; }
+.gate__say[data-state="singing"] { color: var(--signal); }
+.gate__say[data-state="singing"] i { background: var(--signal); opacity: 1; }
+.gate__say[data-state="quiet"] i,
+.gate__say[data-state="error"] i { background: var(--signal); opacity: 0.6; }
+
+@keyframes rec-breathe { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
 .gate__form,
 .gate__flat {
   position: absolute;
@@ -927,6 +976,7 @@ a { color: inherit; }
 @media (hover: hover) and (pointer: fine) {
   .gate__enter:hover { background: var(--void); color: var(--bone); transition-delay: 0s; }
   .gate__enter:hover .gate__enter-arrow { transform: translateX(5px); }
+  .gate__enter:hover .gate__enter-arrow--back { transform: translateX(-5px); }
 }
 
 @media (max-width: 560px) {

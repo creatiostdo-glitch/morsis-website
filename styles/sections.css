@@ -965,12 +965,13 @@ input:-webkit-autofill {
   .btn-ghost:hover { color: var(--bone); border-color: rgba(229, 227, 220, 0.4); }
 }
 
-/* ---------- record (translator.js) — a take is kept for later features ---------- */
+/* ---------- Record: opens Naiva's push-to-speak page (speak.html) ---------- */
 
 .btn-rec {
   display: inline-flex;
   align-items: center;
   gap: 10px;
+  text-decoration: none;
 }
 .rec-dot {
   position: relative;
@@ -980,65 +981,22 @@ input:-webkit-autofill {
   background: var(--signal);
   flex: none;
 }
-/* recording: the dot breathes and throws a ring, like a live tally light */
-.btn-rec.is-rec .rec-dot { animation: rec-breathe 1.2s ease-in-out infinite; }
-.btn-rec.is-rec .rec-dot::after {
+/* a live tally light, so the way into speaking reads at a glance */
+.rec-dot::after {
   content: "";
   position: absolute;
   inset: -4px;
   border: 1px solid var(--signal);
   border-radius: 50%;
-  animation: rec-ring 1.2s var(--ease-out) infinite;
+  opacity: 0;
+  animation: rec-ring 2.4s var(--ease-out) infinite;
 }
-.rec-time {
-  font-variant-numeric: tabular-nums;
-  color: var(--bone);
-  max-width: 0;
-  overflow: hidden;
-  transition: max-width 0.4s var(--ease-out);
-}
-.btn-rec.is-rec .rec-time { max-width: 60px; }
-.btn-rec[disabled] { opacity: 0.4; cursor: default; }
-
-@keyframes rec-breathe { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
 @keyframes rec-ring {
-  from { transform: scale(0.6); opacity: 0.9; }
-  to   { transform: scale(1.9); opacity: 0; }
+  0%   { transform: scale(0.6); opacity: 0.8; }
+  50%  { transform: scale(1.9); opacity: 0; }
+  100% { transform: scale(1.9); opacity: 0; }
 }
-
-.tr-take {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin: 16px 0 0;
-  font-family: var(--font-meta);
-  font-weight: 500;
-  font-size: 10px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--mid);
-  animation: take-in 0.6s var(--ease-out) both;
-}
-.tr-take[hidden] { display: none; }
-.tr-take__name b { font-weight: 500; color: var(--bone); }
-.tr-take__play {
-  padding: 6px 12px;
-  border: 1px solid rgba(229, 227, 220, 0.25);
-  border-radius: 999px;
-  background: transparent;
-  color: var(--bone);
-  font: inherit;
-  letter-spacing: inherit;
-  text-transform: inherit;
-  cursor: pointer;
-  transition: border-color 0.2s var(--ease-out), color 0.2s var(--ease-out);
-}
-.tr-take__play:hover { border-color: var(--signal); color: var(--signal); }
-@keyframes take-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-
-.status[data-state="recording"] { color: var(--signal); }
-.status[data-state="recording"] i { background: var(--signal); animation: pulse 0.6s ease-in-out infinite; }
-
+@media (prefers-reduced-motion: reduce) { .rec-dot::after { animation: none; } }
 /* ---------- the instrument ---------- */
 
 /* [Design Note: a glass instrument (translucent material, 12px blur, hairline

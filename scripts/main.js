@@ -42,7 +42,7 @@
      LIVE SIGNAL — cursor-driven waveform strip
      ---------------------------------------------------------- */
   const signal = document.getElementById('signal');
-  const sctx = signal.getContext('2d');
+  const sctx = signal ? signal.getContext('2d') : null;   // absent on speak.html (no HUD)
 
   let mx = 0.5;       // smoothed cursor x (0..1)
   let targetX = 0.5;  // raw cursor x
@@ -76,6 +76,7 @@
   window.addEventListener('blur', () => glow.classList.remove('is-on'));
 
   function sizeSignal() {
+    if (!sctx) return;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const w = signal.clientWidth;
     const h = signal.clientHeight;
@@ -85,6 +86,7 @@
   }
 
   function drawSignal() {
+    if (!sctx) return;
     t += 0.016;
 
     // while a phrase transmits (transmit.js), the reading head locks to the
@@ -168,8 +170,8 @@
   function start() {
     sizeSignal();
     drawGrain();
-    if (reduced) {
-      drawSignal();      // one static trace
+    if (reduced || !sctx) {
+      drawSignal();      // one static trace (or nothing, on pages without the HUD)
       return;            // no loop
     }
     requestAnimationFrame(frame);

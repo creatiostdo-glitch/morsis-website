@@ -15,10 +15,13 @@
 
   const root = document.documentElement;
   const gate = document.getElementById('gate');
-  if (!gate) { root.classList.remove('is-gated'); return; }
-
   const M = (window.MORSIS = window.MORSIS || {});
+  if (!gate) { root.classList.remove('is-gated'); return; }
+  // coming back from the speak page straight to the engine: no gate this time
+  if (!root.classList.contains('is-gated')) { gate.remove(); M.gated = false; return; }
+
   M.gated = true;
+  const mode = gate.dataset.mode || 'enter';     // 'enter' (index) · 'return' (speak.html)
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const canvas = document.getElementById('gateForm');
   const enterBtn = document.getElementById('gateEnter');
@@ -112,6 +115,7 @@
     uniform float uMorph;     // 0 emblem → 1 droplet
     uniform vec2 uRot;        // yaw, pitch
     uniform float uScale;
+    uniform float uListen;    // live mic level while you speak: the tubes ripple
     uniform sampler2D uSdf;
     const float WORLD = ${WORLD.toFixed(2)};
     const float RANGE_W = ${((2 * RANGE * WORLD) / N).toFixed(5)};
@@ -132,14 +136,17 @@
 
     // every stroke of the logo becomes a round liquid tube
     float emblem (vec3 p) {
-      float r = 0.078 + 0.006 * sin(uTime * 1.1 + p.x * 5.0 + p.y * 3.0);
+      float r = 0.078 + 0.006 * sin(uTime * 1.1 + p.x * 5.0 + p.y * 3.0)
+              + uListen * 0.026 * sin(uTime * 17.0 + p.x * 9.0 - p.y * 7.0);
       float dc = max(logo2(p.xy) + r, 0.0);
       return length(vec2(dc, p.z * 1.1)) - r;
     }
 
     float droplet (vec3 p) {
       float lat = atan(length(p.xz), p.y);
-      return length(p) - 0.6 + sin(lat * 13.0 - uTime * 1.2) * 0.018 * sin(lat);
+      // while you speak, the droplet's bands ripple with your voice
+      float ripple = (0.018 + uListen * 0.05) * sin(lat * 13.0 - uTime * (1.2 + uListen * 5.0)) * sin(lat);
+      return length(p) - 0.6 + ripple;
     }
 
     float map (vec3 p) {
@@ -251,7 +258,7 @@
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
     U = {};
-    ['uRes', 'uTime', 'uMorph', 'uRot', 'uScale', 'uSdf'].forEach((n) => { U[n] = gl.getUniformLocation(prog, n); });
+    ['uRes', 'uTime', 'uMorph', 'uRot', 'uScale', 'uListen', 'uSdf'].forEach((n) => { U[n] = gl.getUniformLocation(prog, n); });
     gl.uniform1i(U.uSdf, 0);
     gl.clearColor(0, 0, 0, 0);
     return true;
@@ -290,11 +297,16 @@
       const k = clamp01((now - leaving.t0) / 900);
       morph = ease(k);
       scale = 1 - 0.35 * ease(clamp01((now - leaving.t0 - 500) / 700));
-    } else if (!reduced) {
+    } else {
       // a droplet appears, then condenses into the emblem
-      scale = 0.0001 + 0.9999 * ease(clamp01((t - 0.25) / 0.7));
-      morph = 1 - ease(clamp01((t - 0.75) / 1.5));
+      const intro = reduced ? 0 : 1 - ease(clamp01((t - 0.75) / 1.5));
+      if (!reduced) scale = 0.0001 + 0.9999 * ease(clamp01((t - 0.25) / 0.7));
+      // holding to speak: the emblem collapses into the droplet, and re-forms on release
+      const dt = Math.min(0.05, (now - (lastNow || now)) / 1000);
+      press += ((holding ? 1 : 0) - press) * (reduced ? 1 : Math.min(1, dt * (holding ? 7 : 4.5)));
+      morph = Math.max(intro, ease(clamp01(press)));
     }
+    lastNow = now;
 
     pointer.x += (pointer.tx - pointer.x) * 0.06;
     pointer.y += (pointer.ty - pointer.y) * 0.06;
@@ -302,8 +314,16 @@
     const yaw = sway + pointer.x * 0.28;
     const pitch = pointer.y * 0.16 + (reduced ? 0 : Math.sin(t * 0.31) * 0.06);
 
+    // speaking: the tubes ripple with your voice; singing: each call is a beat
+    const lv = M.voice ? M.voice.level() : 0;
+    listen += (lv - listen) * (lv > listen ? 0.35 : 0.08);
+    sing *= 0.9;
+    if (M.voice && M.voice.recording()) updateTimer();
+    const beat = 1 + 0.055 * sing + 0.03 * listen;
+
     stage.style.setProperty('--shadow', (scale * (1 - morph * 0.4)).toFixed(3));
     stage.style.setProperty('--shadow-w', (0.55 + 0.45 * (1 - morph) * Math.cos(yaw)).toFixed(3));
+    if (flatEl && gate.classList.contains('gate--flat')) flatEl.style.transform = beat > 1.001 ? `scale(${beat.toFixed(3)})` : '';
 
     if (!gl || !U) return;
     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -311,16 +331,100 @@
     gl.uniform1f(U.uTime, reduced ? 0 : t);
     gl.uniform1f(U.uMorph, morph);
     gl.uniform2f(U.uRot, yaw, pitch);
-    gl.uniform1f(U.uScale, Math.max(0.0001, scale));
+    gl.uniform1f(U.uScale, Math.max(0.0001, scale * beat));
+    gl.uniform1f(U.uListen, reduced ? 0 : listen);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
+
+  /* ---------------- push to speak (scripts/speak.js) ----------------
+     Hold the emblem (or Space / Enter while it has focus): Naiva listens.
+     Release: what you said comes back as bird calls. If nothing was
+     heard, nothing plays. */
+
+  let listen = 0, sing = 0, press = 0, lastNow = 0;
+  const flatEl = gate.querySelector('.gate__flat');
+  const sayEl = document.getElementById('gateSay');
+  const sayText = sayEl ? sayEl.querySelector('span') : null;
+  let holding = false, busy = false, sayTimer = 0;
+
+  function say(text, state, revertMs) {
+    if (!sayEl) return;
+    clearTimeout(sayTimer);
+    sayText.textContent = text;
+    sayEl.dataset.state = state || '';
+    if (revertMs) sayTimer = setTimeout(() => say('Press and hold the emblem to speak', ''), revertMs);
+  }
+  function updateTimer() {
+    const s = M.voice.elapsed();
+    sayText.textContent = `Listening · ${String(Math.floor(s)).padStart(2, '0')}.${Math.floor((s % 1) * 10)} s`;
+  }
+  const kHz = (hz) => (hz / 1000).toFixed(1);
+
+  async function beginSpeak() {
+    if (holding || busy || leaving || !M.voice) return;
+    if (!M.voice.supported()) { say('Speaking needs a microphone', 'error', 3200); return; }
+    holding = true;
+    say('Opening the microphone', 'listening');
+    const res = await M.voice.start({ onLimit: () => endSpeak() });
+    if (!res.ok) {
+      holding = false;
+      if (res.reason === 'blocked') say('Microphone blocked — allow it to speak', 'error', 4200);
+      else if (res.reason === 'nomic') say('No microphone found', 'error', 3200);
+      else if (res.reason === 'released') say('Microphone ready — press and hold to speak', '', 3200);
+      return;
+    }
+    if (!holding) { M.voice.cancel(); return; }      // let go while the mic was opening
+    say('Listening · 00.0 s', 'listening');
+  }
+
+  async function endSpeak() {
+    if (!holding) return;
+    holding = false;
+    if (!M.voice.recording()) return;
+    busy = true;
+    say('Translating to birdsong', 'listening');
+    const result = await M.voice.stop();
+    if (!result || result.silent) {
+      busy = false;
+      say('No sound heard — hold and speak', 'quiet', 3200);
+      return;
+    }
+    say(`Naiva · ${result.calls} call${result.calls === 1 ? '' : 's'} · ${kHz(result.lo)}–${kHz(result.hi)} kHz`, 'singing');
+    const len = M.voice.play(result, 'gate', () => { sing = 1; });
+    setTimeout(() => { busy = false; say('Hold to speak again', '', 2600); }, (len + 0.4) * 1000);
+  }
+
+  stage.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    try { stage.setPointerCapture(e.pointerId); } catch (_) { /* ok */ }
+    beginSpeak();
+  });
+  ['pointerup', 'pointercancel', 'lostpointercapture'].forEach((ev) => stage.addEventListener(ev, endSpeak));
+  stage.addEventListener('contextmenu', (e) => e.preventDefault());
+  stage.addEventListener('keydown', (e) => {
+    if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) { e.preventDefault(); beginSpeak(); }
+  });
+  stage.addEventListener('keyup', (e) => {
+    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); endSpeak(); }
+  });
 
   /* ---------------- entry ---------------- */
 
   function enter() {
     if (leaving) return;
+    if (M.voice && M.voice.recording()) { holding = false; M.voice.cancel(); }
     leaving = { t0: performance.now() };
     enterBtn.disabled = true;
+
+    // the speak page: melt the emblem, then go back to the engine
+    if (mode === 'return') {
+      enterBtn.querySelector('.gate__enter-label').textContent = 'Returning to Naiva';
+      gate.classList.add('is-leaving-soft');
+      setTimeout(() => { window.location.href = enterBtn.dataset.href || 'index.html?return=engine'; }, reduced ? 0 : 750);
+      return;
+    }
+
     enterBtn.querySelector('.gate__enter-label').textContent = 'Entering Project: Birdsong';
     // entering is the visitor's click: switch sound on now, inside the gesture,
     // so the hero's chirps are audible (they can mute it in the hero or the engine)

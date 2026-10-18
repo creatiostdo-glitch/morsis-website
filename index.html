@@ -8,8 +8,12 @@
   <title>MORSIS — Project: Birdsong</title>
   <meta name="description" content="Project: Birdsong. Morsis is a software research lab building the first interspecies communication layer. Bio-acoustic translation, rigorous science, first contact." />
 
-  <!-- the gate (pre-page) is up from the first paint, so the site never flashes underneath it -->
-  <script>document.documentElement.classList.add('js', 'is-gated');</script>
+  <!-- the gate (pre-page) is up from the first paint, so the site never flashes underneath it.
+       Coming back from speak.html (?return=engine) skips the gate and lands on the engine. -->
+  <script>
+    document.documentElement.classList.add('js',
+      /[?&]return=engine\b/.test(location.search) ? 'is-returning' : 'is-gated');
+  </script>
 
   <link rel="stylesheet" href="styles/fonts.css" />
   <link rel="stylesheet" href="styles/main.css" />
@@ -24,11 +28,13 @@
     <span class="gate__logo" role="img" aria-label="Morsis">
       <span class="logo logo--wordmark wordmark__letters"></span><span class="logo logo--emblem wordmark__o"></span>
     </span>
-    <div class="gate__stage" aria-hidden="true">
-      <span class="gate__shadow"></span>
-      <canvas class="gate__form" id="gateForm"></canvas>
-      <span class="gate__flat logo logo--emblem"></span>
+    <!-- push to speak: hold the emblem, Naiva answers in birdsong (scripts/speak.js) -->
+    <div class="gate__stage" role="button" tabindex="0" aria-label="Hold to speak. Release to hear it as birdsong.">
+      <span class="gate__shadow" aria-hidden="true"></span>
+      <canvas class="gate__form" id="gateForm" aria-hidden="true"></canvas>
+      <span class="gate__flat logo logo--emblem" aria-hidden="true"></span>
     </div>
+    <p class="gate__say" id="gateSay" aria-live="polite"><i aria-hidden="true"></i><span>Press and hold the emblem to speak</span></p>
     <button class="gate__enter" id="gateEnter" type="button">
       <span class="gate__enter-label">Click to enter the Birdsong Project</span>
       <span class="gate__enter-arrow" aria-hidden="true">→</span>
@@ -502,15 +508,11 @@
           <div class="tr-actions">
             <button class="btn-primary" type="submit" id="trEncode" disabled>Encode &amp; Modulate Signal</button>
             <button class="btn-ghost" type="button" aria-pressed="false" data-sound-toggle>Sound · off</button>
-            <button class="btn-ghost btn-rec" type="button" id="trRec" aria-pressed="false">
-              <i class="rec-dot" aria-hidden="true"></i><span class="rec-label">Record</span><span class="rec-time" aria-hidden="true"></span>
-            </button>
+            <!-- Record opens Naiva's push-to-speak page; its Go back returns here -->
+            <a class="btn-ghost btn-rec" href="speak.html" id="trRec">
+              <i class="rec-dot" aria-hidden="true"></i><span class="rec-label">Record</span>
+            </a>
           </div>
-          <!-- the last take: kept in MORSIS.recordings for later features -->
-          <p class="tr-take" id="trTake" hidden aria-live="polite">
-            <span class="tr-take__name"></span>
-            <button class="tr-take__play" type="button" aria-label="Play the recording">Play</button>
-          </p>
         </form>
 
         <div class="instrument reveal" id="trInstrument">
@@ -679,6 +681,8 @@
 
   </main>
 
+  <script src="scripts/audio.js" defer></script>
+  <script src="scripts/speak.js" defer></script>
   <script src="scripts/gate.js" defer></script>
   <script src="scripts/main.js" defer></script>
   <script src="scripts/flow.js" defer></script>
